@@ -1,4 +1,4 @@
-# TLV â€” Temporal Logic Verifier
+# TLV — Temporal Logic Verifier
 
 This is a git repo putting together the material for the TLV system and the behavior composition modules and examples.
 
@@ -15,7 +15,7 @@ There are 32-bits executable version for Linux and Windows.
 
     sudo apt-get install ia32-libs
 
- One can also just install the two libraries needed:
+  One can also just install the two libraries needed:
 
     sudo apt-get install libncurses5:i386 libreadline5:i386
 
