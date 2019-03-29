@@ -13,37 +13,37 @@ There are 32-bits executable version for Linux and Windows.
 1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html).
 2. You will need several 32-bit libraryes. The best way to get them all is to run the following to get them all:
 
-    sudo apt-get install ia32-libs
+        sudo apt-get install ia32-libs
 
-  One can also just install the two libraries needed:
+    One can also just install the two libraries needed:
 
-    sudo apt-get install libncurses5:i386 libreadline5:i386
+        sudo apt-get install libncurses5:i386 libreadline5:i386
 
 3. Get also the TLV modules and put them somewhere.
 4. Set `TLV_PATH` where the TLV modules are located. For example:
 
-    export TLV_PATH=/home/ssardina/bin/TLV/Modules/
+        export TLV_PATH=/home/ssardina/bin/TLV/Modules/
 
 5. Try it to make sure it works:
 
-    [ssardina@Thinkpad-X1 Downloads]$ tlv
-    Loading Util.tlv $Revision: 4.3 $
-    Loading MCTL.tlv $Revision: 4.11 $
-    Loading MCTLS.tlv $Revision: 4.1 $
-    Loading TESTER.tlv $Revision: 4.5 $
-    Loading MCsimple.tlv  $Revision: 4.13 $
-    Loading SIMULATE $Revision: 4.4 $
-    Loading Floyd.tlv $Revision: 4.1 $
-    Loading Abstract.tlv  $Revision: 4.3 $
-    Loading modified deductive.tlv $Revision: 4.9 $
-    Loading compat.tlv $Revision: 1.5 $
+        [ssardina@Thinkpad-X1 Downloads]$ tlv
+        Loading Util.tlv $Revision: 4.3 $
+        Loading MCTL.tlv $Revision: 4.11 $
+        Loading MCTLS.tlv $Revision: 4.1 $
+        Loading TESTER.tlv $Revision: 4.5 $
+        Loading MCsimple.tlv  $Revision: 4.13 $
+        Loading SIMULATE $Revision: 4.4 $
+        Loading Floyd.tlv $Revision: 4.1 $
+        Loading Abstract.tlv  $Revision: 4.3 $
+        Loading modified deductive.tlv $Revision: 4.9 $
+        Loading compat.tlv $Revision: 1.5 $
+    
+        file TS.tlv: line 799: _sn undefined Loaded rules file Rules.tlv.
+    
+          Your wish is my command ... 
 
-    file TS.tlv: line 799: _sn undefined Loaded rules file Rules.tlv.
 
-      Your wish is my command ... 
-
-
-    >> 
+        >> 
 
 ## Cannot find library `libreadline.so.5`?
 
