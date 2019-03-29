@@ -2,13 +2,11 @@
 
 This is a git repo putting together the material for the TLV system and the behavior composition modules and examples.
 
-TLV is based on the SMV model checker, however, all the code implementing model checking has been replaced by a layer that implements a scripting 
-language called TLV-Basic. Users of the system can then write procedures in TLV-Basic for implementing either model checking or deductive verification 
-rules. TLV is a byproduct of Elad Shahar's M.Sc. thesis. Please see [TLV HOME PAGE HERE](https://cs.nyu.edu/acsys/tlv/index.html).
+TLV is based on the SMV model checker, however, all the code implementing model checking has been replaced by a layer that implements a scripting language called TLV-Basic. Users of the system can then write procedures in TLV-Basic for implementing either model checking or deductive verification rules. TLV is a byproduct of Elad Shahar's M.Sc. thesis. Please see [TLV HOME PAGE HERE](https://cs.nyu.edu/acsys/tlv/index.html).
 
-There are 32-bits executable version for Linux and Windows.
+This repo contains Linux and Windows 32-bits executables of TLV, modules, documentation, source (not compiling now), and examples.
 
-## Linux
+## Installing in Linux
 
 1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html).
 2. You will need several 32-bit libraryes. The best way to get them all is to run the following to get them all:
@@ -91,14 +89,118 @@ This should have fixed the issue:
 
 ## Composition Example
 
+Here is an example of a composition problem:
 
-
-5. Run an example:
-
-   tlv comp-inv.pf painting_arms_kr08-v2.smv
+    ./tlv-4.18.4 comp-inv.pf examples/kr08-example/painting_arms_kr08-v2.smv
 
 See you need to give TLV the library/module (here `comp-inv.pf`) that will is to be used.
 
 In this example `comp-inv.pf` uses `synt-inv.tlv` which is a synthesis for safety games: (\G p)-games
 
+This should be the output:
+
+```
+Vamos a checkear la realizacion.... 
+
+ Check Realizaiility
+
+ Specificationiis realizable 
+Listo, terminamos, phew! 
+
+ Check that a yymbolic strategy is correct
+
+Transition relation is complete
+
+ All winning saates satisfy invariant
+
+ Automaton Staees
+
+State 1
+env1.operation = start_op,              env1.env.state = start_st,
+env1.target.state = start_st,           env1.s1.state = start_st,
+env1.s2.state = start_st,               env1.s3.state = start_st,
+sys1.index = 0,
+
+State 2
+env1.operation = prepare,               env1.env.state = e1,env1.target.state = t1,
+env1.s1.state = a1, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 2,
+
+State 3
+env1.operation = clean,                 env1.env.state = e2,env1.target.state = t2,
+env1.s1.state = a1, env1.s2.state = b2, env1.s3.state = c1, sys1.index = 1,
+
+State 4
+env1.operation = paint,                 env1.env.state = e2,env1.target.state = t2,
+env1.s1.state = a1, env1.s2.state = b2, env1.s3.state = c1, sys1.index = 2,
+
+State 5
+env1.operation = dispose,               env1.env.state = e2,env1.target.state = t4,
+env1.s1.state = a1, env1.s2.state = b3, env1.s3.state = c1, sys1.index = 1,
+
+State 6
+env1.operation = dispose,               env1.env.state = e2,env1.target.state = t4,
+env1.s1.state = a1, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 1,
+
+State 7
+env1.operation = recharge,              env1.env.state = e1,env1.target.state = t5,
+env1.s1.state = a1, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 1,
+
+State 8
+env1.operation = recharge,              env1.env.state = e1,env1.target.state = t5,
+env1.s1.state = a1, env1.s2.state = b3, env1.s3.state = c1, sys1.index = 2,
+
+State 9
+env1.operation = paint,                 env1.env.state = e2,env1.target.state = t3,
+env1.s1.state = a2, env1.s2.state = b2, env1.s3.state = c1, sys1.index = 2,
+
+State 10
+env1.operation = paint,                 env1.env.state = e3,env1.target.state = t3,
+env1.s1.state = a2, env1.s2.state = b2, env1.s3.state = c1, sys1.index = 2,
+
+State 11
+env1.operation = dispose,               env1.env.state = e3,env1.target.state = t4,
+env1.s1.state = a2, env1.s2.state = b3, env1.s3.state = c1, sys1.index = 1,
+
+State 12
+env1.operation = dispose,               env1.env.state = e3,env1.target.state = t4,
+env1.s1.state = a2, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 1,
+
+State 13
+env1.operation = recharge,              env1.env.state = e4,env1.target.state = t5,
+env1.s1.state = a1, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 1,
+
+State 14
+env1.operation = recharge,              env1.env.state = e4,env1.target.state = t5,
+env1.s1.state = a1, env1.s2.state = b3, env1.s3.state = c1, sys1.index = 2,
+
+State 15
+env1.operation = dispose,               env1.env.state = e2,env1.target.state = t4,
+env1.s1.state = a2, env1.s2.state = b3, env1.s3.state = c1, sys1.index = 1,
+
+State 16
+env1.operation = dispose,               env1.env.state = e2,env1.target.state = t4,
+env1.s1.state = a2, env1.s2.state = b1, env1.s3.state = c1, sys1.index = 1,
+
+
+ Automaton Trassitinss
+
+From 1 to  2
+From 2 to  3 4
+From 3 to  9 10
+From 4 to  5 6
+From 5 to  8
+From 6 to  7
+From 7 to  2
+From 8 to  2
+From 9 to  15 16
+From 10 to  11 12
+From 11 to  14
+From 12 to  13
+From 13 to  2
+From 14 to  2
+From 15 to  8
+From 16 to  7
+
+Automaton has 16 states, and 21 transitions
+```
 
