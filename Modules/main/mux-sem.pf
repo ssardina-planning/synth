@@ -1,0 +1,51 @@
+Print "Loading script for verifying a mutual exclusion specification for\n";
+Print "mux-sem, which uses semaphores to impose mutual exclusion.\n\n";
+
+Print "Creating mutual exclusion specification for N = ",N,"\n";
+
+-- The following procudure prepares the mutual exclusion specifications
+-- according to "N", the number of processes. You can change N by editing
+-- the smv file.
+To make_p;
+
+  -- Set of states where at least one of the processes is in
+  -- the critical section.
+  Local loc_or := FALSE;
+
+  -- Set of states where mutual exclusion holds (original specification).
+  Let p := TRUE;
+
+  -- Loop over all processes
+  For (k in 1...N)
+    Let loc_or := loc_or | proc[k].loc = 3;
+
+    Let k1 := k - 1;
+    While (k1)
+      Let p := p & !(proc[k].loc = 3 & proc[k1].loc = 3);
+      Let k1 := k1 - 1;
+    End
+  End
+
+  -- Set of states where a process is in the critical section iff
+  -- the semaphore "y" is 0.
+  Local p0 := loc_or <-> ! y;
+
+  -- Calculate stronger specification for mutual exclusion.
+  Let p_strong := p & p0 ;
+  Print "Original specification created in variable 'p'\n";
+  Print "Stronger specification created in variable 'p_strong'\n\n";
+
+End
+
+Run make_p;
+
+To prove;
+  Print "Checking if p is an invariant using the basic invariance rule:\n";
+  Print "(This should fail and a counter example should be displayed)\n";
+  Run binv p;
+
+  Print "\nChecking if p_strong is an invariant using the basic invariance rule:\n";
+  Run binv p_strong;
+End
+
+Print "Type 'Run prove;' to execute the proof\n";

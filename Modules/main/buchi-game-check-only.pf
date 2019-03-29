@@ -1,0 +1,10 @@
+Load "synt-buchi-game.tlv";
+
+To do_synthesis;
+
+  check_realizability;
+  
+End -- To do_synthesis;
+
+do_synthesis;
+quit;

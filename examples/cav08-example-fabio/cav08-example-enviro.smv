@@ -1,0 +1,150 @@
+-- A set of available behaviors interacting with a DB
+-- Available behaviors are "guarded" by DB state
+
+MODULE main
+VAR
+  env: system Env(sys.index);
+  sys: system Sys;
+DEFINE
+  good := (sys.initial & env.initial) | -- intial state is "good" by definition
+			!(env.failure); -- services are always required to not fail
+
+MODULE Sys
+VAR
+ index : 0..3; -- num of services, 0 used for init
+INIT
+  index = 0
+TRANS
+  case
+	index=0 : next(index)!=0;
+	index!=0 : next(index)!=0;
+  esac
+DEFINE
+   initial := (index=0);
+
+MODULE Env(index)
+-- Represents the evolution of DB and available services, seen as a whole
+VAR
+  operation  : {start_op,pick,store,play,display_content,free_mem};
+  db : Databox(operation);
+  target : Target(operation,db.state);
+  s1 : Service1(index,operation,db.state);
+  s2 : Service2(index,operation,db.state);
+  s3 : Service3(index,operation,db.state);
+DEFINE
+  initial := (db.initial & s1.initial & s2.initial & s3.initial & target.initial & operation=start_op);
+  failure := (s1.failure | s2.failure | s3.failure) |
+                (target.final & !(s1.final & s2.final & s3.final));				
+
+-- Target service-----------
+MODULE Target(op,db_state) --op is an output parameter, db_state is input
+VAR
+	state : {start_st,t0,t1,t2,t3};
+INIT
+	state = start_st & op = start_op
+TRANS
+	case
+		state = start_st & op = start_op : next(state) = t0 & next(op) in {pick};
+		state = t0  & op = pick : next(state) = t1 & next(op) in {play};
+		state = t1  & op = play  : next(op) in {pick,store} & next(state) = t2 &
+								   (next(op) = pick -> next(db_state) = d2) & 
+								   (next(op) = store -> next(db_state) = d1);
+		state = t2  & op = pick : next(state) = t1 & next(op) in {play};
+		state = t2  & op = store: next(state) = t3 & next (op) in {free_mem};
+		state = t3 & op = free_mem: next(state) = t0 & next(op) in {pick};
+	esac
+DEFINE
+	initial := state=start_st & op=start_op;
+	final := state in {t1}; -- final state(s)
+-- end of target service -----------
+
+
+-- Available service #1 -----------
+MODULE Service1(index,operation,db_state)
+VAR
+  state : {start_st,s10,s11,s12};
+INIT
+	state=start_st
+TRANS
+  	    case
+			state=start_st & operation=start_op & index=0: next(state)=s10;
+			(index != 1) : next(state) = state;
+			(state=s10 & operation = store) : db_state in {d1,d2} &
+											  (db_state = d1 -> next(state) in {s11,s12}) &
+											  (db_state = d2 -> next(state) in {s11});
+			(state=s11 & operation=pick) : next(state) in {s10};
+			(state=s11 & operation=free_mem) : next(state) in {s11};
+			(state=s12 & operation=free_mem) : next(state) in {s11};
+			TRUE : next(state) = state;
+		esac 
+DEFINE
+		initial := state=start_st & operation=start_op & index = 0;
+        failure :=
+			index = 1 & !((state = s10 & operation=store & db_state in {d1,d2})|
+							(state= s11 & operation=pick) | 
+							(state= s11 & operation = free_mem)|
+							(state=s12 & operation=free_mem));
+        final := state in {s10,s11};
+-- end of available service #1 -----------
+
+-- Available service #2 -----------
+MODULE Service2(index,operation,db_state)
+VAR
+  state:{start_st,s20,s21};
+INIT
+  state=start_st
+TRANS
+  case
+	state=start_st & operation=start_op & index = 0 : next(state) in {s20};
+	(index != 2) : next(state)=state;
+	(state = s20 & operation = display_content) : next(state) in {s20};
+	(state = s20 & operation = pick) : next(state) in {s21};
+	(state = s21 & operation = play) : db_state = d2 & next(state) in {s20};
+	TRUE : next(state) = state;
+  esac
+DEFINE
+  initial := state=start_st & operation=start_op & index = 0;
+  failure :=
+        index = 2 & !((state = s20 & operation = display_content)|(state = s20 & operation = pick)|(state = s21 & db_state = d2 & operation = play));
+  final := state in {s20,s21};
+-- end of available service #2 -----------
+
+-- Available service #3 -----------
+MODULE Service3(index,operation,db_state)
+VAR
+  state:{start_st,s30};
+INIT
+  state=start_st
+TRANS
+  case
+	state=start_st & operation=start_op & index=0: next(state)=s30;
+	(index != 3) : next(state)=state;
+	(state = s30 & operation = play) : db_state=d1 & next(state)=s30;
+	TRUE : next(state) = state;
+  esac
+DEFINE
+  initial := state=start_st & operation=start_op & index = 0;
+  failure :=
+        index = 3 & !(db_state = d1 & operation = play);
+  final := state in {s30};
+-- end of available service #3 -----------
+
+-- databox (environment) -----------
+MODULE Databox(operation) -- moves at each step (synchronous with community)
+VAR
+  state:{start_st, d0,d1,d2};
+INIT
+  state=start_st
+TRANS
+  case
+	state=start_st & operation=start_op : next(state) = d0;
+	state = d0 & operation = pick : next(state) in {d1,d2};
+	state = d1 & operation = pick : next(state) in {d1,d2};
+	state = d2 & operation = pick : next(state) in {d1,d2};
+	state = d1 & operation = store : next(state) in {d0};
+	state = d2 & operation = store : next(state) in {d0};
+	TRUE : next(state) = state; -- all other operations have no effects on databox
+  esac
+DEFINE
+  initial := (state=start_st);
+-- end of databox specification -----------

@@ -1,0 +1,159 @@
+-- Sebastian Sardina - May 2009 - Painting arms example in IJCAI'07 paper
+-- Standard version as in Fabios' thesis approach.
+
+----------------------------------------------------------------------------------
+---- ENVIRONMENT
+----------------------------------------------------------------------------------
+
+-- lets define the environment
+MODULE Environment(operation)
+VAR
+	state: {start_st,e1,e2,e3,e4};
+INIT
+	state = start_st
+TRANS
+	case
+		state = start_st & operation = start_op : next(state) = e1;
+		state = e1 & operation = recharge : next(state) = e1;
+		state = e1 & operation = prepare : next(state) = e2;
+		state = e2 & operation = dispose : next(state) = e1;
+		state = e2 & operation = paint : next(state) = e2;
+		state = e2 & operation = clean : next(state) in {e2,e3}; --confirm non determinism code
+		state = e3 & operation in {paint,clean} : next(state) = e3;
+		state = e3 & operation = dispose : next(state) = e4;
+		state = e3 & operation = recharge : next(state) = e2;
+		state = e4 & operation = prepare : next(state) = e3;
+		state = e4 & operation = recharge : next(state) = e1;
+	esac
+DEFINE
+  initial := state = start_st;
+-- end environment definition
+
+----------------------------------------------------------------------------------
+---- AVAILABLE BEHAVIORS
+----------------------------------------------------------------------------------
+-- lets define the available robot arm A
+MODULE ArmA(index,operation,env)
+VAR
+	state: {start_st,a1,a2};
+INIT
+	state = start_st
+TRANS
+	case 
+		state = start_st & operation = start_op & index = 0 : next(state) = a1;
+		index != 1 : next(state) = state;
+		state = a1 & operation in {dispose,recharge} : next(state) = a1;
+		state = a1 & operation = clean & env in {e2}: next(state) = a2;
+		state = a2 & operation = recharge : next(state) = a2;
+		state = a2 & operation = dispose : next(state) = a1;
+		TRUE : next(state) = state;
+	esac
+DEFINE
+	initial := state = start_st & operation = start_op & index = 0; -- why index = 0 ?
+	failure :=
+		index = 1 &
+		!(
+			(state = a1 & operation in {dispose,recharge})|
+			(state = a1 & operation in {clean} & env in {e2})| 
+			(state = a2 & operation = recharge)|
+			(state = a2 & operation = dispose)		
+		);
+	--final:= state = a1;-- no final state for us ?
+-- end robot arm A definition
+
+-- lets define the available robot arm B
+MODULE ArmB(index,operation,env)
+VAR
+	state: {start_st,b1,b2,b3,b4};
+INIT
+	state = start_st
+TRANS
+	case
+		state = start_st & operation = start_op & index = 0: next(state) = b1;
+		index != 2 : next(state) = state;
+		state = b1 & operation = prepare : next(state) = b2;
+		state = b2 & operation = clean : next(state) = b1;
+		state = b2 & operation = paint : next(state) in {b1,b3} ;
+		state = b3 & operation = recharge: next(state) = b1;
+		state = b3 & operation = prepare : next(state) = b4;
+		state = b4 & operation = clean : next(state) = b3;
+		TRUE : next(state) = state;
+	esac
+DEFINE
+	initial := state = start_st & operation = start_op & index = 0;
+	failure :=
+		index = 2 &
+		!(
+			(state = b1 & operation = prepare)|
+			(state = b2 & operation = clean)|
+			(state = b2 & operation = paint)|
+			(state = b3 & operation = recharge)|
+			(state = b3 & operation = prepare)|
+			(state = b4 & operation = clean)		
+		);	
+	--final:= state = b1;
+-- end arm B definition
+
+----------------------------------------------------------------------------------
+---- TARGET BEHAVIOR
+----------------------------------------------------------------------------------
+MODULE Target(operation, env)
+VAR
+	state: {start_st,t1,t2,t3,t4,t5};
+INIT
+	state = start_st & operation = start_op
+TRANS
+	case
+		state = start_st & operation = start_op : next(state) = t1 & next(operation) in {prepare};
+		state = t1 & operation = prepare : next(state) = t2 & next(operation) in {paint,clean};
+		state = t2 & operation = paint : next(state) = t4 & next(operation) = dispose;
+		state = t2 & operation = clean : next(state) = t3 & next(operation) = paint;
+		state = t3 & operation = paint : next(state) = t4 & next(operation) in dispose;
+		state = t4 & operation = dispose : next(state) = t5 & next(operation) = recharge;
+		state = t5 & operation = recharge : next(state) = t1 & next(operation) = prepare;		
+	esac
+DEFINE
+	initial:= state = start_st & operation = start_op;
+	--final:= state = t1;
+-- end of target behavior definition
+
+
+----------------------------------------------------------------------------------
+---- SYSTEM
+----------------------------------------------------------------------------------
+MODULE Env(index)
+-- Represents the evolution of environment and available behaviors
+VAR
+  operation  : {start_op,prepare,dispose,clean,paint,recharge};
+  env : Environment(operation);
+  target : Target(operation,env.state);
+  s1 : ArmA(index,operation,env.state);
+  s2 : ArmB(index,operation,env.state);
+DEFINE
+  initial := (env.initial & s1.initial & s2.initial & target.initial & operation=start_op);
+  failure := (s1.failure | s2.failure);
+  			  --(target.final & !(s1.final & s2.final & s3.final));	----- no final states for us
+  			  
+  
+MODULE Sys
+VAR
+ index : 0..2; -- num of services, 0 used for init
+INIT
+  index = 0
+TRANS
+  case
+	index=0 : next(index)!=0;
+	index!=0 : next(index)!=0;
+  esac
+DEFINE
+   initial := (index=0);
+   
+   
+MODULE main
+VAR
+  env1: system Env(sys1.index);
+  sys1: system Sys;
+DEFINE
+  good := (sys1.initial & env1.initial) | -- intial state is "good" by definition
+			!(env1.failure); -- services are always required to not fail
+

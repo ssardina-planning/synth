@@ -1,0 +1,53 @@
+----------------------------------------------------------------------------------
+---- THE OVERAL SYSTEM
+----------------------------------------------------------------------------------
+MODULE FullSystem
+-- Represents the evolution of environment and available behaviors
+VAR
+  req : {start_st,a,b};
+  req2 : {1,2};
+INIT
+  req = start_st & req2 = 2
+TRANS
+  (req2 = 1 -> req = a) 	-- does not work here!
+  & 
+  case  
+    req = start_st : next(req) != start_st;
+    req != start_st : next(req) != start_st;
+  esac
+DEFINE
+  initial := req = start_st & req2 = 2;
+  failure := FALSE;
+  			  
+
+----------------------------------------------------------------------------------
+---- THE CONTROLLER THAT WILL DO THE COMPOSITION
+----------------------------------------------------------------------------------
+MODULE Controller(req)
+VAR
+ do : {start_op,a,b};
+ req2 : {1,2};
+INIT
+  do = start_op & req2 = 2
+TRANS
+  (req2 = 1 <-> do = a) & 	-- does work well here!
+  case
+    do = start_op : next(do) != start_op;
+    do = a : next(do) = b;
+    do = b : next(do) = a;
+  esac
+DEFINE
+   initial := (do = start_op) & (req2 = 2);
+   
+
+----------------------------------------------------------------------------------
+---- THE MAIN MODULE - DOMAIN INDEPENDENT
+----------------------------------------------------------------------------------
+MODULE main
+VAR
+  fullsys: system FullSystem;
+  scheduler: system Controller(fullsys.req);
+DEFINE
+  good := TRUE;
+  --good := (scheduler.initial & fullsys.initial) | !fullsys.failure;
+

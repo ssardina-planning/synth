@@ -1,0 +1,44 @@
+# Simple semaphore program.  There are two processes which
+# have a state.  They cannot both be at the critical state.
+
+MODULE main
+DEFINE
+  N := 3;
+VAR
+  y : boolean;
+
+  # The processes have interleaved execution.
+  # Note that the semaphore is assigned by both of the processors.
+  proc : array 1..N of process user(y);
+
+ASSIGN
+  init(y) := 1;
+
+MODULE user(y)
+VAR
+  loc : 0..4;
+ASSIGN
+  init(loc) := 0;
+
+  # Assign loc according to the cycle:
+  #     0 -> 1 -> 2 -> 3 -> 4
+  next(loc) :=
+    case
+      loc in {0,3} : loc+1;
+      loc = 1      : {1,2};
+      loc = 2 & y  : 3;
+      loc = 4      : 0;
+      1 : loc;
+    esac;
+
+  next(y) :=
+    case
+      # Turn semaphore off if in the next loc the process
+      # will enter the critical loc.
+      loc = 2 & next(loc) = 3 : 0;
+
+      # Turn semaphore on if the process is currently exiting.
+      loc = 3 & next(loc) = 4 : 1;
+      1 : y;
+    esac;
+

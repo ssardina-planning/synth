@@ -1,0 +1,20 @@
+Load "synt-inv.tlv";
+
+To do_synthesis;
+
+  check_realizability;
+  
+  If (realizable)
+  
+    symb_strategy;
+  
+    check_symb;
+  
+    enumerate_symb;
+  
+    print_automat;
+  End -- If (realizable)
+End -- To do_synthesis;
+
+do_synthesis;
+quit;

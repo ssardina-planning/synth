@@ -1,0 +1,84 @@
+-- Standard version as in Fabios' thesis approach.
+
+----------------------------------------------------------------------------------
+---- ENVIRONMENT
+----------------------------------------------------------------------------------
+
+-- lets define the environment
+MODULE Environment(operation)
+VAR
+	state: {start_st,e1,e2};
+INIT
+	state = start_st
+TRANS
+	case
+		state = start_st & operation = start_op : next(state) = e1;
+		state = e1 & operation = a : next(state) = e2;
+		state = e2 & operation = b : next(state) = e1;
+		TRUE : next(state) = state;
+	esac
+DEFINE
+  initial := state = start_st;
+-- end environment definition
+
+--------------------------------------------------------------------------------
+--
+---- TARGET BEHAVIOR
+----------------------------------------------------------------------------------
+MODULE Target(operation, env)
+VAR
+	state: {start_st,t1,t2};
+INIT
+	state = start_st & operation = start_op
+TRANS
+	case
+		state = start_st & operation = start_op : 
+			next(state) = t1 & next(operation) in {a};
+		state = t1 & operation = a : 
+			next(state) = t2 & next(operation) in {b};
+		state = t2 & operation = b : 
+			next(state) = t1 & next(operation) in {a} ;
+	esac
+DEFINE
+	initial:= state = start_st & operation = start_op;
+	--final:= state = t1;
+-- end of target behavior definition
+
+
+----------------------------------------------------------------------------------
+---- SYSTEM
+----------------------------------------------------------------------------------
+MODULE Env(index)
+-- Represents the evolution of environment and available behaviors
+VAR
+  operation  : {start_op,prepare,dispose,clean,paint,recharge};
+  env : Environment(operation);
+  target : Target(operation,env.state);
+DEFINE
+  initial := (env.initial & target.initial & operation=start_op);
+  failure := (s1.failure | s2.failure);
+  			  --(target.final & !(s1.final & s2.final & s3.final));	----- no final states for us
+  			  
+  
+MODULE Sys
+VAR
+ index : 0..2; -- num of services, 0 used for init
+INIT
+  index = 0
+TRANS
+  case
+	index=0 : next(index)!=0;
+	index!=0 : next(index)!=0;
+  esac
+DEFINE
+   initial := (index=0);
+   
+   
+MODULE main
+VAR
+  env1: system Env(sys1.index);
+  sys1: system Sys;
+DEFINE
+  good := (sys1.initial & env1.initial) | -- intial state is "good" by definition
+			!(env1.failure); -- services are always required to not fail
+
