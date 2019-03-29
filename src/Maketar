@@ -1,0 +1,12 @@
+#!/bin/sh
+
+FNAME=tlv-src-$1
+
+rm -f ${FNAME}.tgz
+
+# Be careful not to include grammar.c, input.c, y.tab.h
+tar cvzf ${FNAME}.tgz README grammar.y input.lex Maketar makefile \
+    makefile.util makefile.main makefile.mingw32 \
+    [a-f]*.{h,c} [h-x]*.h hash.c instantiate.c [j-z]*.c
+
+chmod 644 ${FNAME}.tgz

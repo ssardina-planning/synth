@@ -1,0 +1,34 @@
+EXEC = tlv
+
+include makefile.util
+
+TLVOBJ = $(UTILOBJ) fts.o bdd2var.o instantiate.o main.o grammar.o input.o eval.o smv.o bdd_to_formula.o tlv.o 
+
+# To check dynamic memory allocation in sgi, add: -lmalloc_ss  
+LIB = -lm -L/usr/local/lib $(READLINELIB) 
+
+tlv:    $(TLVOBJ)
+	rm -f tlv
+	$(CC) $(CFLAGS) $(TLVOBJ) $(LIB) $(DEBUG) $(STATIC) -o tlv
+
+
+
+grammar.o: grammar.c storage.h node.h script.h tlv.h util_err.h
+input.o: input.c node.h y.tab.h util_err.h myread.h
+
+bdd2var.o:  node.h bdd.h symbols.h
+instantiate.o: node.h hash.h assoc.h util_err.h y.tab.h symbols.h fts.h
+fts.o: fts.h node.h bdd.h y.tab.h
+bdd_to_formula.o: bdd_to_formula.c eval.h $(UTILH)
+eval.o: eval.c y.tab.h $(UTILH)
+script.o: eval.h $(UTILH)
+smv.o: smv.c fts.h y.tab.h $(UTILH) eval.h
+tlv.o: tlv.c y.tab.h smv.h eval.h $(UTILH)
+main.o: main.c tlv.h y.tab.h version.h $(UTILH)
+
+
+
+
+
+check_bdd:    check_bdd.o $(TLVOBJ) $(DEBUG)
+	$(CC) $(CFLAGS) $(UTILOBJ) check_bdd.o $(LIB) $(DEBUG) -o check_bdd

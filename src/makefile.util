@@ -1,0 +1,41 @@
+UTILOBJ = assoc.o hash.o node.o storage.o bdd.o mystring.o \
+	script.o util_err.o symbols.o 
+
+BASICH = storage.h node.h hash.h assoc.h
+UTILH = $(BASICH) bdd.h mystring.h script.h util_err.h symbols.h
+
+all: $(EXEC)
+
+# bison ouputs file to grammar.tab.{c,h} instead of y.tab.{c,h}
+grammar.c y.tab.h: grammar.y
+	rm -f grammar.tab.c y.tab.c grammar.c
+	$(YACC) -v -d grammar.y ;
+	if [ -f grammar.tab.c ] ; \
+	then \
+	    cp grammar.tab.c grammar.c; \
+	    cp grammar.tab.h y.tab.h;\
+	fi
+
+#	     cp grammar.tab.h y.tab.h; \ ]
+# 	$(YACC) -v -d -t grammar.y; mv y.tab.c grammar.c  for debugging yacc
+
+input.c: input.lex
+	$(LEX) $(LFLAGS) input.lex; mv lex.yy.c input.c
+
+
+storage.o: storage.c storage.h
+hash.o: hash.c hash.h storage.h 
+mystring.o: mystring.c mystring.h storage.h hash.h 
+util_err.o: util_err.c util_err.h node.h
+assoc.o: assoc.c assoc.h storage.h hash.h node.h
+node.o: node.c mystring.h util_err.h y.tab.h bdd.h $(BASICH)
+symbols.o: symbols.c y.tab.h bdd.h $(BASICH)
+bdd.o: bdd.c bdd_print.c bdd_sat.c bdd.h util_err.h y.tab.h $(BASICH)
+
+
+clean: 
+	rm *.o
+
+pure: clean
+	rm -f input.c grammar.c y.tab.h grammar.tab.c grammar.tab.h
+

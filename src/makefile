@@ -1,0 +1,36 @@
+# Comment to omit READLINE support. READLINE doesn't work under cc in sgi.
+RL = 1
+
+# Use this only when copying to the web. (doesn't work for sun).
+#STATIC= -static
+
+# comment out next line for special platforms:
+#  cyg == cygnus/cygwin   (in this case use gcc)
+#PLATFORM = -DSYS=cyg
+
+############################################################
+
+# comment out next line if dynamic variable reordering option is not desired
+REORDER = -DREORDER
+
+RL1 = $(RL:1=-DREADLINE)
+RL2 = $(RL:1=-I/usr/local/include)
+RL3 = $(RL:1=-lreadline)
+RL4 = $(RL:1=-ltermcap)
+READLINE = $(RL1) $(RL2)
+READLINELIB = $(RL3) $(RL4)
+
+# For strict checking:
+#  gcc:    -Wall -Wshadow 
+#          If very strict add -pedantic
+#          Other possible additions:  -Wtraditional -Wpointer-arith
+
+
+# Linux has flex installed by default.
+LEX = flex
+YACC = bison
+CC = gcc
+CFLAGS = -g -O -I. $(READLINE) $(REORDER) $(PLATFORM) -DLEX=$(LEX)
+# -DYYDEBUG -xprofile=tcov
+
+include makefile.main
