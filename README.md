@@ -45,7 +45,7 @@ This repo contains Linux and Windows 32-bits executables of TLV, modules, docume
 
         >> 
 
-## Cannot find library `libreadline.so.5`?
+### Cannot find library `libreadline.so.5`?
 
 If you get an error like this one:
 
