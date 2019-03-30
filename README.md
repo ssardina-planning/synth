@@ -74,6 +74,8 @@ or
 
     sudo apt-get install libreadline5:i386
     
+There is also a `.deb` package under `extras/` obtained from [here](https://packages.debian.org/jessie/amd64/lib32readline5/download).
+    
 This should have fixed the issue:
 
     [ssardina@Thinkpad-X1 Downloads]$ ldd tlv
