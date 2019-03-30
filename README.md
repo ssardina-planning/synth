@@ -8,7 +8,10 @@ This repo contains Linux and Windows 32-bits executables of TLV, modules, docume
 
 ## Installing in Linux
 
-1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html).
+1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html):
+
+    git clone git@bitbucket.org:ssardina-research/tlv.git
+
 2. You will need several 32-bit libraryes. The best way to get them all is to run the following to get them all:
 
         sudo apt-get install ia32-libs
@@ -17,12 +20,11 @@ This repo contains Linux and Windows 32-bits executables of TLV, modules, docume
 
         sudo apt-get install libncurses5:i386 libreadline5:i386
 
-3. Get also the TLV modules and put them somewhere.
-4. Set `TLV_PATH` where the TLV modules are located. For example:
+3. TLV requires the pack of modules `.tlv`. If they are not in the same directory as the executable, set variable`TLV_PATH`. For example, if you cloned it from this repo:
 
-        export TLV_PATH=/home/ssardina/bin/TLV/Modules/
+        export TLV_PATH=path/to/tlv-git/Modules/
 
-5. Try it to make sure it works:
+4. Try it to make sure it works:
 
         [ssardina@Thinkpad-X1 Downloads]$ tlv
         Loading Util.tlv $Revision: 4.3 $
@@ -43,14 +45,14 @@ This repo contains Linux and Windows 32-bits executables of TLV, modules, docume
 
         >> 
 
-## Cannot find library `libreadline.so.5`?
+### Cannot find library `libreadline.so.5`?
 
 If you get an error like this one:
 
     [ssardina@Thinkpad-X1 tlv-linux]$ ./tlv 
     ./tlv: error while loading shared libraries: libreadline.so.5: cannot open shared object file: No such file or directory
 
-Then, you may not have the 32-bits version`libreadline.so.5` library.
+Then, you may not have the 32-bits version`libreadline.so.5` library. See [this post](http://www.cesareriva.com/install-segger-j-link-tools-on-gnulinux-x64-machine/)
 
 First, you can find out all the libraries that `tlv` needs and where it has found them:
 
@@ -71,6 +73,8 @@ In this case, `libreadline.so.5` couldn't be found. The So you install them as f
 or
 
     sudo apt-get install libreadline5:i386
+    
+There is also a `.deb` package under `extras/` obtained from [here](https://packages.debian.org/jessie/amd64/lib32readline5/download).
     
 This should have fixed the issue:
 
@@ -93,7 +97,10 @@ Here is an example of a composition problem:
 
     ./tlv-4.18.4 comp-inv.pf examples/kr08-example/painting_arms_kr08-v2.smv
 
-See you need to give TLV the library/module (here `comp-inv.pf`) that will is to be used.
+See you need to give TLV the library/module (here `comp-inv.pf`) that will is to be used. Otherwise, you can use script `tlv-comp.sh`:
+
+    ./tlv-comp.sh  examples/kr08-example/painting_arms_kr08-v2.smv
+    
 
 In this example `comp-inv.pf` uses `synt-inv.tlv` which is a synthesis for safety games: (\G p)-games
 
