@@ -52,7 +52,7 @@ If you get an error like this one:
     [ssardina@Thinkpad-X1 tlv-linux]$ ./tlv 
     ./tlv: error while loading shared libraries: libreadline.so.5: cannot open shared object file: No such file or directory
 
-Then, you may not have the 32-bits version`libreadline.so.5` library.
+Then, you may not have the 32-bits version`libreadline.so.5` library. See [this post](http://www.cesareriva.com/install-segger-j-link-tools-on-gnulinux-x64-machine/)
 
 First, you can find out all the libraries that `tlv` needs and where it has found them:
 
