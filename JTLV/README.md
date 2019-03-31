@@ -40,7 +40,7 @@ This should print the controller if solvable:
 NOTE: Please read Fabio's email on how the smv file should be built
 
 
-## JTL format
+## SMV format for JTLV
 
 (Notes from Fabio Patrizi, April 2, 2015).
 
@@ -48,6 +48,15 @@ To make the original TLV `.smv` files compliant with JTLV you have to:
 
 1. remove the keyword "system" from the declaration of modules environment and agent in the `main`.
 2. add "TRUE &" as first line in the `TRANS` section, whenever it starts with a `case` statement (this is what gave me the exception; there must be some bug).
+
+
+## Building JTLV
+
+The source for JTLV is under `src` and it does not compile at this time. Please see issue #1.
+
+JTLV uses ANTLR v3 runtime (package `libantlr3-runtime-java`) and [JavaBDD](http://javabdd.sourceforge.net/) 
+
+
 
 
 
