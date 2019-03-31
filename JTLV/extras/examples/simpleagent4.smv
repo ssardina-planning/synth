@@ -1,0 +1,116 @@
+MODULE main
+	VAR
+		environment: Env(agent.action, agent.last, agent.initial);
+		agent: Sys(environment.p, environment.q, environment.r, environment.s, environment.req);
+		
+	DEFINE
+		good := environment.last;
+		
+MODULE Env(action, last, initial)
+	VAR
+		p: boolean;
+		q: boolean;
+		r: boolean;
+		s: boolean;
+		pstate : {tinit,t1,t2,t3};
+		req : {reqinit, req1,req2,req3,req4,req5};
+		
+	INIT
+		p=0 & q=0 & r=0 & s=0 & pstate=tinit & req= reqinit
+		
+	TRANS
+		case
+			initial=1 : next(p)=1 & next(q)=0 & next(r)=1 & next(s)=0 & next(pstate)=t1 & next(req) in {req1,req2,req3};
+
+			--pr
+			last=0 & p=1 & q=0 & r=1 & s=0 & action=a : next(p)=0 & next(q)=0 & next(r)=1 & (next(s)=0 | next(s)=1) & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=0 & r=1 & s=0 & action=b : next(p)=1 & next(q)=0 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=0 & r=1 & s=0 & action=c : next(p)=1 & (next(q)=0 | next(q)=1) & next(r)=0 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--ps
+			last=0 & p=1 & q=0 & r=0 & s=1 & action=a : next(p)=1 & next(q)=1 & next(r)=0 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=0 & r=0 & s=1 & action=b : next(p)=1 & next(q)=1 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			
+			--pq
+			last=0 & p=1 & q=1 & r=0 & s=0 & action=a : next(p)=1 & next(q)=0 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=1 & r=0 & s=0 & action=b : next(p)=1 & next(q)=1 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=1 & r=0 & s=0 & action=c : next(p)=0 & next(q)=1 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			
+			--p
+			last=0 & p=1 & q=0 & r=0 & s=0 & action=b : next(p)=1 & next(q)=1 & next(r)=0 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--pqs
+			last=0 & p=1 & q=1 & r=0 & s=1 & action=b : next(p)=0 & next(q)=1 & next(r)=0 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=1 & q=1 & r=0 & s=1 & action=c : next(p)=1 & next(q)=1 & next(r)=0 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--q
+			last=0 & p=0 & q=1 & r=0 & s=0 & action=a : next(p)=0 & next(q)=1 & next(r)=0 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			
+			--qs
+			last=0 & p=0 & q=1 & r=0 & s=1 & action=a : next(p)=0 & next(q)=1 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=0 & q=1 & r=0 & s=1 & action=b : next(p)=1 & next(q)=1 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--qr
+			last=0 & p=0 & q=1 & r=1 & s=0 & action=c : next(p)=1 & next(q)=1 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--sr
+			last=0 & p=0 & q=0 & r=1 & s=1 & action=a : next(p)=1 & next(q)=1 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			last=0 & p=0 & q=0 & r=1 & s=1 & action=c : next(p)=0 & next(q)=1 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			--r
+			last=0 & p=0 & q=0 & r=1 & s=0 & action=b : next(r)=1 & ((next(p)=0 & next(q)=0 & next(s)=1) | (next(p)=1 & next(q)=1 & next(s)=0)) & next(pstate)=pstate & next(req)=req;
+			
+			--pqr
+			last=0 & p=1 & q=1 & r=1 & s=0 & action=a : next(p)=1 & next(q)=0 & next(r)=1 & next(s)=1 & next(pstate)=pstate & next(req)=req;
+			
+			--psr
+			last=0 & p=1 & q=0 & r=1 & s=1 & action=b : next(p)=1 & next(q)=0 & next(r)=1 & next(s)=0 & next(pstate)=pstate & next(req)=req;
+			
+			last=1 & req=req1 : next(p)=p & next(q)=q & next(r)=r & next(s)=s & next(pstate)=t2 & next(req) = req4;
+			last=1 & req=req2 : next(p)=p & next(q)=q & next(r)=r & next(s)=s & next(pstate)=t2 & next(req) = req4;
+			last=1 & req=req3 : next(p)=p & next(q)=q & next(r)=r & next(s)=s & next(pstate)=t3 & next(req) = req5;
+			last=1 & req=req4 : next(p)=p & next(q)=q & next(r)=r & next(s)=s & next(pstate)=t3 & next(req) = req5;
+			last=1 & req=req5 : next(p)=p & next(q)=q & next(r)=r & next(s)=s & next(pstate)=t1 & next(req) in {req1,req2,req3};
+
+		esac
+		
+MODULE Sys(p,q,r,s,req)
+	VAR
+		action : {start_op,a,b,c,last_op};
+		initial: boolean;
+		last: boolean;
+		violated: boolean;
+		
+	INIT
+		initial=1 & last=0 & violated=0 & action=start_op
+		
+	TRANS
+		case
+		--req1 (t1->t2) : <p, s & q>
+		--req2 (t1->t2) : <p, q>
+		--req3 (t1->t3) : <r, q>
+		--req4 (t2->t4) : <q, r>
+		--req5 (t3->t1) : <r, p & s>
+			violated=1 : next(violated)=1 & next(last)=0 & next(initial)=0;
+			
+			(next(req)=req1 & next(p)=0) : next(violated)=1 & next(last)=0 & next(initial)=0;
+			(next(req)=req2 & next(p)=0) : next(violated)=1 & next(last)=0 & next(initial)=0;
+			(next(req)=req3 & next(r)=0) : next(violated)=1 & next(last)=0 & next(initial)=0;
+			(next(req)=req4 & next(q)=0) : next(violated)=1 & next(last)=0 & next(initial)=0;
+			(next(req)=req5 & next(r)=0) : next(violated)=1 & next(last)=0 & next(initial)=0;
+			
+			(next(req)=req1 & next(p)=1 & !(next(q)=1 & next(s)=1) ) : next(violated)=0 & next(last)=0 & next(initial)=0;
+			(next(req)=req1 & next(p)=1 & (next(q)=1 & next(s)=1) ) : next(violated)=0 & next(last)=1 & next(initial)=0 & next(action)=last_op;
+			
+			(next(req)=req2 & next(p)=1 & next(q)=0) : next(violated)=0 & next(last)=0 & next(initial)=0;
+			(next(req)=req2 & next(p)=1 & next(q)=1) : next(violated)=0 & next(last)=1 & next(initial)=0 & next(action)=last_op;
+			
+			(next(req)=req3 & next(r)=1 & next(q)=0) : next(violated)=0 & next(last)=0 & next(initial)=0;
+			(next(req)=req3 & next(r)=1 & next(q)=1) : next(violated)=0 & next(last)=1 & next(initial)=0 & next(action)=last_op;
+			
+			(next(req)=req4 & next(q)=1 & next(r)=0) : next(violated)=0 & next(last)=0 & next(initial)=0;
+			(next(req)=req4 & next(q)=1 & next(r)=1) : next(violated)=0 & next(last)=1 & next(initial)=0 & next(action)=last_op;
+			
+			(next(req)=req5 & next(r)=1 & !(next(p)=1 & next(s)=1) ) : next(violated)=0 & next(last)=0 & next(initial)=0;
+			(next(req)=req5 & next(r)=1 & (next(p)=1 & next(s)=1) ) : next(violated)=0 & next(last)=1 & next(initial)=0 & next(action)=last_op;
+		esac
