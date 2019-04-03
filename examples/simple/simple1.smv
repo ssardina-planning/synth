@@ -1,0 +1,111 @@
+-- Author: Sebastian Sardina
+-- Solution of Exercise 0
+
+--------------------------------------------------------------------------------
+---- THE MAIN TLV MODULE - DOMAIN INDEPENDENT
+--------------------------------------------------------------------------------
+MODULE main
+VAR
+  env: system Env(sys.index);
+  sys: system Controller;
+DEFINE
+  good := (sys.initial & env.initial) | -- intial state is "good" by defs_inition
+			!(env.failure); -- services are always required not to fail
+
+--------------------------------------------------------------------------------
+---- THE CONTROLLER THAT WILL DO THE COMPOSITION (this is to be computed!)
+-------------------------------------------------------------------------------
+MODULE Controller
+VAR
+ index : 0..2; -- num of services, 0 used for dummy start
+INIT
+ index = 0
+TRANS
+  case
+    TRUE : next(index) in 1..2;	
+  esac
+DEFINE
+   initial := index = 0;
+
+--------------------------------------------------------------------------------
+---- ENVIRONMENT
+--------------------------------------------------------------------------------
+MODULE Env(index)
+-- Represents the evolution of available services, seen as a whole
+VAR
+  operation  : {start, a, b, c};
+  target : Target(operation); -- "produces" operations
+  s1 : Service1(index, operation); -- "consumes" current index and operation 
+  s2 : Service2(index, operation); -- same as above
+INIT
+  operation = start
+DEFINE
+  initial := (s1.initial & s2.initial & target.initial & operation = start);
+  failure := (s1.failure | s2.failure) |
+                  (target.final & !(s1.final & s2.final));
+
+--------------------------------------------------------------------------------
+---- TARGET BEHAVIOR
+--------------------------------------------------------------------------------
+MODULE Target(op) --op is an output parameter
+VAR
+	state : {s_init, t0, t1, t2}; 
+INIT
+	state = s_init
+TRANS
+	case
+		state = s_init & op = start : next(state) = t0 & next(op) in {a,b};
+		state = t0  & op in {a, b} : next(state) = t1 & next(op) = c;
+		state = t1  & op = c : next(state) = t0 & next(op) in {a,b};
+	esac
+DEFINE
+	initial := state = s_init;
+	final := state = t0; -- final state(s)
+-- end of target service -----------
+
+
+--------------------------------------------------------------------------------
+---- AVAILABLE BEHAVIORS
+--------------------------------------------------------------------------------
+
+-- Available service #1 -----------
+MODULE Service1(index,operation)
+VAR
+  state : {s_init, s10, s11, err};
+INIT
+	state = s_init & index = 0
+TRANS
+    case
+	    state = s_init & operation = start & index = 0 : next(state) = s10;
+	    index != 1 : next(state) = state; -- if not selected, remain still
+	    state = s10 & operation = b : next(state) = s11;
+	    state = s10 & operation = c : next(state) = s10;
+	    state = s11 & operation = c : next(state) = s10;
+        TRUE : next(state) = err;
+    esac
+DEFINE
+	initial := state = s_init;
+    failure :=
+		index = 1 & !(	(state = s10 & operation in {b,c}) | (state = s11 & operation = c) );
+    final := state = s10;
+-- end of available service #1 -----------
+
+-- Available service #2 -----------
+MODULE Service2(index, operation)
+VAR
+    state : {s_init, s20, s21, err};
+INIT
+    state = s_init & index = 0
+TRANS
+    case
+        state = s_init & operation = start & index = 0 : next(state) in {s20};
+        index != 2 : next(state) = state; -- if not selected, remain still
+        state = s20 & operation = a : next(state) in {s20, s21};
+        state = s21 & operation = c : next(state) in {s20};
+        TRUE : next(state) = err;
+    esac
+DEFINE
+  initial := state = s_init;
+  failure := index = 2 & !(	(state = s20 & operation = a) | (state = s21 & operation = c) );
+  final := state = s20;
+-- end of available service #2 -----------
