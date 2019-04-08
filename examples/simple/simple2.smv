@@ -1,35 +1,32 @@
--- Author: Fabio Patrizi
--- Solution of Exercise 1
+-- Author: Sebastian Sardina
+-- Solution of Exercise 2
 
---------------------------------------------------------------------------------
----- THE MAIN TLV MODULE - DOMAIN INDEPENDENT
---------------------------------------------------------------------------------
 MODULE main
 VAR
   env: system Env(sys.index);
-  sys: system Controller;
+  sys: system Sys;
 DEFINE
   good := (sys.initial & env.initial) | -- intial state is "good" by definition
 			!(env.failure); -- services are always required not to fail
 
---------------------------------------------------------------------------------
----- THE CONTROLLER THAT WILL DO THE COMPOSITION (this is to be computed!)
--------------------------------------------------------------------------------
-MODULE Controller
+MODULE Sys
 VAR
- index : 0..2; -- num of services, 0 used for init
+ index : 0..3; -- num of services, 0 used for init
 INIT
   index = 0
 TRANS
   case
-    TRUE : next(index) in 1..2;	
+	index=0 : next(index)!=0;
+	index!=0 : next(index)!=0;
   esac
 DEFINE
-   initial := index = 0;
+   initial := (index=0);
 
---------------------------------------------------------------------------------
----- ENVIRONMENT
---------------------------------------------------------------------------------
+
+
+
+
+
 MODULE Env(index)
 -- Represents the evolution of available services, seen as a whole
 VAR
@@ -37,88 +34,96 @@ VAR
   target : Target(operation); -- "produces" operations
   s1 : Service1(index,operation); -- "consumes" current index and operation 
   s2 : Service2(index,operation); -- same as above
-INIT
-  operation = start_op
+  s3 : Service3(index,operation); -- same as above
 DEFINE
-  initial := (s1.initial & s2.initial & target.initial & operation=start_op);
-  failure := (s1.failure | s2.failure) |
-                (target.final & !(s1.final & s2.final));
+  initial := (s1.initial & s2.initial & s3.initial & target.initial & operation=start_op);
+  failure := (s1.failure | s2.failure | s3.failure) |
+                (target.final & !(s1.final & s2.final & s3.final));
 
---------------------------------------------------------------------------------
----- TARGET BEHAVIOR
---------------------------------------------------------------------------------
+-- Target service-----------
 MODULE Target(op) --op is an output parameter
 VAR
-	state : {start_st,t0,t1,t2};
+	state : {start_st,t0,t1,t2,t3};
 INIT
-	state = start_st
+	state = start_st & op = start_op
 TRANS
 	case
 		state = start_st & op = start_op : next(state) = t0 & next(op) in {a};
 		state = t0  & op = a : next(state) = t1 & next(op) in {b};
-		state = t1  & op = b  : next(state) = t2 & next(op) in {b,c};
-		state = t2  & op = b : next(state) = t2 & next(op) in {b,c};
-		state = t2  & op = c: next(state) = t0 & next (op) in {a};
+		state = t1  & op = b : next(state) = t2 & next(op) in {b,a};
+		state = t2  & op = b : next(state) = t2 & next(op) in {b,a};
+		state = t2  & op = a : next(state) = t3 & next(op) in {b};
+		state = t3  & op = b : next(state) = t0 & next (op) in {a};
 	esac
 DEFINE
-	initial := state = start_st;
-	final := state in {t0,t2}; -- final state(s)
+	initial := state=start_st & op=start_op;
+	final := state in {t0,t3}; -- final state(s)
 -- end of target service -----------
 
-
---------------------------------------------------------------------------------
----- AVAILABLE BEHAVIORS
---------------------------------------------------------------------------------
 
 -- Available service #1 -----------
 MODULE Service1(index,operation)
 VAR
-  state : {start_st,s10,s11,s12};
+  state : {start_st,s10,s11};
 INIT
-	state = start_st
+	state=start_st
 TRANS
   	    case
 			state=start_st & operation=start_op & index=0: next(state)=s10;
 			(index != 1) : next(state) = state; -- if not selected, remain still
-			(state = s10 & operation = a) : next(state) in {s11,s12};
-			(state = s10 & operation = b) : next(state) in {s10};
-			(state = s11 & operation = b) : next(state) in {s10};
-			(state = s11 & operation = c) : next(state) in {s10};
-			(state = s12 & operation = c) : next(state) in {s12};
-			(state = s12 & operation = b) : next(state) in {s10};
-            TRUE : TRUE;
+			(state=s10 & operation = a) : next(state) in {s10,s11};
+			(state=s11 & operation = b) : next(state) in {s10};
 		esac
 DEFINE
-		initial := state = start_st;
+		initial := state=start_st & operation=start_op & index = 0;
         failure :=
-			index = 1 & !(	(state = s10 & operation in {a,b})|
-							(state = s11 & operation in {b,c})| 
-							(state = s12 & operation in {b,c})
+			index = 1 & !(	(state = s10 & operation in {a})|
+							(state = s11 & operation in {b})
 						);
-        final := state = s10;
+        final := state in {s10};
 -- end of available service #1 -----------
+
 
 -- Available service #2 -----------
 MODULE Service2(index,operation)
 VAR
   state:{start_st,s20,s21};
 INIT
-  state = start_st
+  state=start_st
 TRANS
   case
-	state = start_st & operation = start_op : next(state) in {s20};
+	state=start_st & operation=start_op & index = 0 : next(state) in {s20};
 	(index != 2) : next(state)=state;
-	(state = s20 & operation = b) : next(state) in {s20};
-	(state = s20 & operation = c) : next(state) in {s21};
-	(state = s21 & operation = a) : next(state) in {s21};
-	(state = s21 & operation = c) : next(state) in {s20};
-    TRUE : TRUE;
+	(state = s20 & operation = b) : next(state) in {s20,s21};
+	(state = s21 & operation = a) : next(state) in {s20};
   esac
 DEFINE
-  initial := state = start_st;
+  initial := state=start_st & operation=start_op & index = 0;
   failure :=
-        index = 2 & !(	(state = s20 & operation in {b,c})|
-						(state = s21 & operation in {a,c})
+        index = 2 & !(	(state = s20 & operation in {b})|
+						(state = s21 & operation in {a})
 					);
-  final := state in {s20,s21};
+  final := state in {s20};
 -- end of available service #2 -----------
+
+
+
+-- Available service #3 -----------
+MODULE Service3(index,operation)
+VAR
+  state:{start_st,s30};
+INIT
+  state=start_st
+TRANS
+  case
+	state=start_st & operation=start_op & index = 0 : next(state) in {s30};
+	(index != 3) : next(state)=state;
+	(state = s30 & operation in {c}) : next(state) in {s30};
+  esac
+DEFINE
+  initial := state=start_st & operation=start_op & index = 0;
+  failure :=
+        index = 3 & !(	(state = s30 & operation in {c})
+					);
+  final := state in {s30};
+-- end of available service #3 -----------
