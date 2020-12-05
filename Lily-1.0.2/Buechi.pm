@@ -2990,7 +2990,7 @@ sub FromString {
 		    die "missing state name";
 		}
 		my $name = $1;
-		unless ($line =~ s/\s+label:\s*({.*})//) {
+		unless ($line =~ s/\s+label:\s*(\{.*})//) {
 		    die "missing label specification";
 		}
 		my $labelspec = $1;

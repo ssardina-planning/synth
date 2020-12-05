@@ -1075,7 +1075,7 @@ sub FromString {
 		    unless ($succ =~ s/\]$//) {
 			die "missing right bracket";
 		    }
-		    unless ($succ =~ s/({.*}),({.*})/$2/) {
+		    unless ($succ =~ s/(\{.*}),(\{.*})/$2/) {
 			print $succ,"\n";
 			die "wrong format\n";
 		    }
