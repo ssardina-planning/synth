@@ -1,0 +1,44 @@
+Use demo-call to run the demos, e.g.,
+------------------------------
+./demo-call -n 3
+./demo-call -n 3-5
+./demo-call -n 6 -s 1
+
+Use demo-clean to remove all generated files.
+
+
+Information about the demos
+---------------------------
+					  t0 t1
+demo-v1.ltl  Unrealizable,weak     req	   1  1
+demo-v2.ltl  Unrealizable,weak     cancel  1
+	  		           go	   0  0 ...
+demo-v3.ltl  Realizable,weak
+demo-v4.ltl  Unrealizable,weak
+In V4 geht das nicht, Du weisst ja nicht ob ein go kommen wird, und musst also
+einen Tick warten.  Nehme an, in Tick 0 kommt ein req und ein cancel.  In Tick
+1 kannst du noch kein grant geben, weil Du in Tick 0 nicht weisst, ob in Tick 1
+ein go kommt.  Nehme an, in Tick 1 kommt ein cancel und ein go.  In Tick 2
+darfst Du keinen grant geben wegen der cancel in Tick 1, und du weisst nicht,
+ob in T2 ein go kommt.  Und jetzt bleiben einfach cancel und go hoch, wie in
+T1, und Du kannst nichts machen.  Und das alles, weil Du eine Moore und keine
+Mealy machine bist...
+
+demo-v5.ltl  Realizable,weak
+demo-v6.ltl  Realizable,weak
+demo-v7.ltl  Realizable,weak
+demo-v8.ltl  Realizable,strong
+demo-v9.ltl  Realizable,strong
+demo-v10.ltl Realizable,strong
+demo-v11.ltl Unrealizable, strong
+demo-v12.ltl Realizable, weak
+demo-v13.ltl Realizable, weak
+demo-v14.ltl Realizable, strong
+demo-v15.ltl Realizable, weak
+demo-v16.ltl Realizable, weak
+demo-v17.ltl Realizable, strong
+demo-v18.ltl Realizable, strong
+demo-v19.ltl Realizable, strong - simple traffic light
+demo-v20.ltl Realizable, strong - simple traffic light, with reset timer
+demo-v22.ltl Unrealizable, strong (safey formulas fails)
+demo-v23.ltl Realizable, strong (UCT weak)

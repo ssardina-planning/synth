@@ -1,0 +1,23 @@
+#!/bin/bash
+
+num=23;
+while getopts n: opt
+do
+case $opt in
+n)
+num=$OPTARG
+;;
+\?)
+echo arg parse error;
+exit 1
+esac
+done
+
+for i in `seq 1 $num`;
+do
+  echo "rm -rf demo-v$i"
+  rm -rf demo-v$i
+done
+	
+echo "rm -f ltl2vl*.dot"
+rm -f  ltl2vl*.dot

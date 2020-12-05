@@ -1,0 +1,5 @@
+assume always(eventually!(req=1));
+assert always(eventually!(grant=1));
+assert always(req=1 -> eventually!(grant=1));
+assert (grant=0);
+assert always(grant=0 -> (grant=0 until! req=1));

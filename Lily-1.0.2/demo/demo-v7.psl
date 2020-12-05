@@ -1,0 +1,4 @@
+assume always(cancel -> next_e[1:2](go));
+assert always(req -> next_e[0:3] (grant || cancel));
+assert always(grant -> next(!grant));
+assert always(cancel -> next((!grant) until! go));

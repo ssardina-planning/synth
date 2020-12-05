@@ -1,0 +1,25 @@
+States
+n28: {X((FALSE)R((cancel=0)+(X(go=1)))),req=1,cancel=0,X(((grant=0)*(X(grant=0)))*(X(X(grant=0))))}
+n33: {go=1,X(go=1),X((TRUE)U((((req=1)*(X(((grant=0)*(X(grant=0)))*(X(X(grant=0))))))+((grant=1)*(X(grant=1))))+((cancel=1)*(X((grant=1)R(go=0)))))),X((FALSE)R((cancel=0)+(X(go=1))))}
+n15: {cancel=0,X((FALSE)R((cancel=0)+(X(go=1)))),X(grant=0),grant=0}
+n17: {X((FALSE)R((cancel=0)+(X(go=1)))),X(grant=1),grant=1,go=1,X(go=1)}
+n27: {req=1,X((FALSE)R((cancel=0)+(X(go=1)))),X(go=1),X(((grant=0)*(X(grant=0)))*(X(X(grant=0))))}
+n14: {X((FALSE)R((cancel=0)+(X(go=1)))),X(go=1),grant=0,X(grant=0)}
+n26: {go=1,X((FALSE)R((cancel=0)+(X(go=1)))),cancel=0,X(X(grant=0)),X(grant=0),grant=0}
+n32: {cancel=0,X((FALSE)R((cancel=0)+(X(go=1)))),X((TRUE)U((((req=1)*(X(((grant=0)*(X(grant=0)))*(X(X(grant=0))))))+((grant=1)*(X(grant=1))))+((cancel=1)*(X((grant=1)R(go=0))))))}
+n25: {grant=0,X(grant=0),X((FALSE)R((cancel=0)+(X(go=1)))),X(X(grant=0)),go=1,X(go=1)}
+n16: {grant=1,X(grant=1),X((FALSE)R((cancel=0)+(X(go=1)))),cancel=0}
+Arcs
+   n28 -> {[{grant=0},{[{},n25],[{cancel=0},n26]}]}
+   n33 -> {[{grant=0},{[{cancel=0,go=1},n32],[{go=1},n33],[{req=1,cancel=0,go=1},n28],[{go=1,req=1},n27]}],[{grant=1},{[{go=1,cancel=0},n16],[{req=1,go=1},n27],[{go=1},n17],[{go=1,cancel=0},n32],[{go=1},n33],[{go=1,req=1,cancel=0},n28]}]}
+   n15 -> {[{grant=0},{}]}
+   n17 -> {[{grant=1},{}]}
+   n27 -> {[{grant=0},{[{go=1},n25],[{go=1,cancel=0},n26]}]}
+   n14 -> {[{grant=0},{}]}
+   n26 -> {[{grant=0},{[{},n14],[{cancel=0},n15]}]}
+-> n32 -> {[{grant=1},{[{},n33],[{req=1},n27],[{},n17],[{cancel=0},n16],[{cancel=0},n32],[{req=1,cancel=0},n28]}],[{grant=0},{[{req=1},n27],[{cancel=0,req=1},n28],[{},n33],[{cancel=0},n32]}]}
+   n25 -> {[{grant=0},{[{go=1},n14],[{cancel=0,go=1},n15]}]}
+   n16 -> {[{grant=1},{}]}
+Fair Sets
+{}
+End

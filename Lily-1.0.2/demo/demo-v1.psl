@@ -1,0 +1,4 @@
+always(req -> next_a[1:3](grant));
+always(grant -> next(!grant));
+always(cancel -> next((!grant) until! go));
+
