@@ -1,4 +1,4 @@
-# TLV — Temporal Logic Verifier
+# TLV ï¿½ Temporal Logic Verifier
 
 This is a git repo putting together the material for the TLV system and the behavior composition modules and examples.
 
@@ -8,10 +8,7 @@ This repo contains Linux and Windows 32-bits executables of TLV, modules, docume
 
 ## Installing in Linux
 
-1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html):
-
-    git clone git@bitbucket.org:ssardina-research/tlv.git
-
+1. Get TLV system by clonning this repo or getting it from its [home page](http://www.cs.nyu.edu/acsys/tlv/index.html).
 2. You will need several 32-bit libraryes. The best way to get them all is to run the following to get them all:
 
         sudo apt-get install ia32-libs
