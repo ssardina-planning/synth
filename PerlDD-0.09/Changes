@@ -1,0 +1,9 @@
+Revision history for Perl extension Cudd.
+
+0.09  Thursday Apr 22 2010
+	- Reworked Makefile.PL for libraries to allow compilation on
+	  Cygiwin
+
+0.01  Sat Nov 27 02:45:58 1999
+	- original version; created by h2xs 1.18
+
