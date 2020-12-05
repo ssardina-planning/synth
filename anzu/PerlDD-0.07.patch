@@ -1,0 +1,339 @@
+diff -Naur PerlDD-0.07/Cudd.pm PerlDD-0.07.patch/Cudd.pm
+--- PerlDD-0.07/Cudd.pm	2005-05-18 04:45:05.000000000 +0000
++++ PerlDD-0.07.patch/Cudd.pm	2007-03-05 19:33:34.000000000 +0000
+@@ -165,6 +165,21 @@
+     return $BDD;
+ }
+ 
++=item BddZero
++
++Returns the constant 0 of a BDD manager.
++
++=cut
++
++sub BddZero {
++    my $manager = shift;
++    croak "Invalid reference" unless ref $manager;
++    my $node = ReadZero($$manager);
++    Ref($node);
++    my $BDD = Cudd::BDD->new($manager,$node);
++    return $BDD;
++}
++
+ =item Reorder
+ 
+ Reorders the BDDs of a manager.
+@@ -321,10 +336,89 @@
+     croak "Invalid reference" unless ref $manager;
+     # carp "In Cudd::BDD::new:          creating $node\n";
+     bless { manager => $manager,
+-	    node => $node
++            node => $node,
++            node_name => Cudd::NodeName($node)
+ 	  }, $class;
+ }
+ 
++=item BddToAdd
++
++Convert the given bdd to an add. An add does not contain complement
++edges.
++
++=cut
++
++sub BddToAdd {
++    my $bdd = shift;
++    
++    my $manager = $$bdd{'manager'};
++    my $node = $$bdd{'node'};
++    croak "Invalid reference" unless ref $manager;
++
++    my $new_node = Cudd::BddToAdd($$manager, $node);
++    Cudd::Ref($new_node);
++    my $BDD = new Cudd::BDD($manager,$new_node);
++    return $BDD;
++}
++
++=item T
++
++Return the node which is connected to the true edge of the given node.
++
++=cut
++
++sub T {
++    my $bdd = shift;
++
++    my $manager = $$bdd{'manager'};
++    my $node = $$bdd{'node'};
++
++    my $new_node = Cudd::T($node);
++    if($new_node) {
++      Cudd::Ref($new_node);
++      my $BDD = new Cudd::BDD($manager,$new_node);
++      return $BDD;
++    } else {
++      return undef;
++    }
++}
++
++=item E
++
++Return the node which is connected to the false edge of the given node.
++
++=cut
++
++sub E {
++    my $bdd = shift;
++    
++    my $manager = $$bdd{'manager'};
++    my $node = $$bdd{'node'};
++    my $new_node = Cudd::E($node);
++    if($new_node) {
++      Cudd::Ref($new_node);
++      my $BDD = new Cudd::BDD($manager,$new_node);
++      return $BDD;
++    } else {
++      return undef;
++    }
++}
++
++=item NodeName
++
++Return a unique name for any node of the bdd. The name is build of the
++c-address of the node pointer.
++
++=cut
++
++sub NodeName {
++    my $bdd = shift;
++
++    my $node = $$bdd{'node'};
++    my $node_name = Cudd::NodeName($node);
++    return $node_name;
++}
++
+ sub DESTROY {
+     my $self = shift;
+     my $manager = $self->{manager};
+@@ -481,6 +575,36 @@
+     return $BDD;
+ }
+ 
++
++=item Minimize
++
++Finds a small BDD that agrees with f (first argument) over c (second
++argument)
++
++=cut
++
++sub Minimize {
++    my ($f,$c) = @_;
++    my $manager = $f->{'manager'};
++    my $node = Cudd::bddMinimize($$manager,$f->{'node'},$c->{'node'});
++    Cudd::Ref($node);
++    my $BDD = new Cudd::BDD($manager,$node);
++    return $BDD;
++}
++
++=item bddVarIsDependent
++
++Check dependend variable
++
++=cut 
++
++sub bddVarIsDependent {
++  my ($f, $var) = @_;
++  my $manager = $f->{'manager'};
++  my $bddVarIsDependent = Cudd::bddVarIsDependent($$manager, $f->{'node'},$var->{'node'});
++  return $bddVarIsDependent;
++}
++
+ =item Squeeze
+ 
+ Finds a small BDD in an interval.
+@@ -1053,6 +1177,42 @@
+     return $retval;
+ }
+ 
++=item DumpBlif
++
++Writes a file of a set of BDDs in blif format. The function has
++one mandatory parameter, the list of BDDs for which the blif
++description is desired, and two optional parameters, the array of
++input names and the array of output names. All parameters are array
++references. If the input names are omitted but the output names are
++not, a reference to an empty array ([]) should be passed for the input
++names.
++
++=cut
++
++sub DumpBlif {
++    my ($fref, $inames, $onames) = @_;
++    my $manager;
++
++    my @f = ();
++    if (ref($fref) eq "ARRAY") {
++      my $first = $$fref[0];
++      $manager = $first->{'manager'};
++      croak "Invalid reference" unless ref $manager;
++      
++      foreach my $bdd (@$fref) {
++	push(@f,$bdd->{'node'});
++      }
++    } else {
++      croak "DumpBlif expects array of bdd's";
++    }
++
++#    print "INAMES: ". length($inames) . "; ONAMES: " . length($onames) . " BDDS: " . length(@f) . "\n";
++    my $retval = Cudd::DumpBlif($$manager,\@f, $inames, $onames);
++
++    warn "Error while writing blif file" if ($retval != 1);
++    return $retval;
++}
++
+ =item Intersect
+ 
+ Computes a function included in the intersection of $f and $g. (That
+diff -Naur PerlDD-0.07/Cudd.xs PerlDD-0.07.patch/Cudd.xs
+--- PerlDD-0.07/Cudd.xs	2001-05-21 04:57:07.000000000 +0000
++++ PerlDD-0.07.patch/Cudd.xs	2007-03-05 19:33:34.000000000 +0000
+@@ -228,6 +228,10 @@
+ Cudd_ReadOne(dd)
+ 	DdManager*	dd
+ 
++DdNode *
++Cudd_ReadZero(dd)
++	DdManager*	dd
++
+ int
+ Cudd_DagSize(node)
+ 	DdNode*		node
+@@ -376,6 +380,8 @@
+ 	DdNode*		f
+ 	DdNode*		g
+ 
++
++
+ int
+ Cudd_Decreasing(dd, f, i)
+ 	DdManager*	dd
+@@ -1015,3 +1021,119 @@
+ 	safefree(dds);
+ OUTPUT:
+ 	RETVAL
++
++DdNode *
++Cudd_BddToAdd(dd, bdd)
++	DdManager*	dd
++	DdNode*		bdd
++
++DdNode *
++Cudd_T(bdd)
++	DdNode*		bdd
++
++DdNode *
++Cudd_E(bdd)
++	DdNode*		bdd
++
++int
++Cudd_NodeName(bdd)
++  DdNode* bdd
++CODE:
++  RETVAL = (int)ST(0);
++OUTPUT:
++	RETVAL
++
++
++
++DdNode *
++Cudd_bddMinimize(dd, f, c)
++	DdManager*	dd
++	DdNode*		f
++	DdNode*		c
++
++double
++Cudd_bddVarIsDependent(dd, f, var)
++	DdManager*	dd
++	DdNode*		f
++	DdNode*		var
++
++int
++Cudd_DumpBlif(dd,f,onameref,inameref)
++	DdManager *dd
++PREINIT:
++	I32 len, leni;
++	I32 index;
++	SV  *rvx, *rvi, *rvo;
++	SV  *svx, *svi, *svo;
++	DdNode  **dds;
++	char **onames, **inames;
++	FILE * file_ptr;
++CODE:
++	rvx = ST(1);
++	if (!SvROK(rvx))
++	  croak("Not a reference given to DumpBlif");
++	svx = SvRV(rvx);
++	if (SvTYPE(svx) != SVt_PVAV)
++	  croak("Not array reference given to DumpBlif");
++	if (av_len((AV*)svx) < 0)
++	  croak("Empty array reference given to DumpBlif");
++	len = av_len((AV*)svx) + 1;
++	dds = (DdNode **) safemalloc(len * sizeof(DdNode *));
++	for (index = 0; index < len; index++) {
++	  dds[index] = (DdNode *)
++	    SvIV(SvRV(*av_fetch((AV*)svx, index, FALSE)));
++	}
++
++
++	/* Process list of output names. */
++	rvo = ST(3);
++	if (!SvROK(rvo))
++		croak("Not a reference given to DumpBlif");
++	svo = SvRV(rvo);
++	if (SvTYPE(svo) != SVt_PVAV)
++		croak("Not array reference given to DumpBlif");
++	if (av_len((AV*)svo) < 0) {
++		onames = NULL;
++	} else {
++	  if (len != av_len((AV*)svo) + 1)
++	    croak("Number of output names is incorrect in DumpBlif");
++	  onames = (char **) safemalloc(len * sizeof(char *));
++	  for (index = 0; index < len; index++) {
++	    onames[index] =
++	      SvPV(*av_fetch((AV*)svo, index, FALSE), PL_na);
++	  }
++	}
++
++	/* Process list of input names. */
++	rvi = ST(2);
++	if (!SvROK(rvi))
++		croak("Not a reference given to DumpBlif");
++	svi = SvRV(rvi);
++	if (SvTYPE(svi) != SVt_PVAV)
++		croak("Not array reference given to DumpBlif");
++	if (av_len((AV*)svi) < 0) {
++		inames = NULL;
++	} else {
++	  leni = av_len((AV*)svi) + 1;
++	  if (leni != Cudd_ReadSize(dd))
++	    croak("Number of input names is incorrect in DumpBlif");
++	  inames = (char **) safemalloc(leni * sizeof(char *));
++	  for (index = 0; index < leni; index++) {
++	    inames[index] =
++	      SvPV(*av_fetch((AV*)svi, index, FALSE), PL_na);
++	  }
++	}
++
++	file_ptr = NULL;
++	file_ptr = fopen("cudd.blif", "w+");
++	if(file_ptr == NULL) {
++	  croak("Unable to open file 'cudd.blif' for writing blif");
++	} else {
++	  RETVAL = Cudd_DumpBlif(dd, len, dds, inames, onames, NULL, file_ptr);
++          fclose(file_ptr);
++        }
++	safefree(dds);
++	if (onames != NULL) safefree(onames);
++	if (inames != NULL) safefree(inames);
++OUTPUT:
++	RETVAL
