@@ -1,0 +1,39 @@
+# D & (E & F -> G)
+
+#OBSERVATIONS (controller's input):
+empty, has_unmarked
+
+#ACTIONS (controller's output):
+extract
+put
+stop
+
+(
+  # D (preconditions, non-concurrent actions, and stop action):
+  G( (extract -> !empty) && (put -> has_unmarked) &&
+     ((extract && !put && !stop) || (!extract && put && !stop) || (!extract && !put && stop)) &&
+     (stop -> X stop)
+  )
+  &&
+  (
+    ( # E (initial conditions, effects, and frame):
+      !empty &&
+      G( put -> X( !empty && !has_unmarked ) ) &&
+      G( stop -> ((empty <-> X empty) && (has_unmarked <-> X has_unmarked)) )
+      &&
+      # F (temporal assumptions):
+      ( ( (GF(extract) && FG(!put)) -> FG(empty) ) && ( GF(put) -> FG(!has_unmarked) ) )
+    )
+    ->
+    # Goal:
+    ( FG(empty && !has_unmarked) && G(has_unmarked -> (!extract U put)) )
+  )
+)
+
+# one line
+G( (extract -> !empty) && (put -> has_unmarked) && ((extract && !put && !stop) || (!extract && put && !stop) || (!extract && !put && stop)) && (stop -> X stop)) && ( ( !empty && G( put -> X( !empty && !has_unmarked ) ) && G( stop -> ((empty <-> X empty) && (has_unmarked <-> X has_unmarked)) ) && ( ( (GF(extract) && FG(!put)) -> FG(empty) ) && ( GF(put) -> FG(!has_unmarked) ) )) -> ( FG(empty && !has_unmarked) && G(has_unmarked -> (!extract U put)) ))
+
+
+input: empty, has_unmarked
+output: extract, put, stop
+

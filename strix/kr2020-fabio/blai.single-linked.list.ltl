@@ -1,0 +1,35 @@
+# D & (E & F -> G)
+
+#OBSERVATIONS (controller's input):
+has_next
+
+#ACTIONS (controller's output):
+next
+stop
+
+(
+  # D (preconditions, non-concurrent actions, and stop action):
+  G( (next -> has_next) &&
+     ((next && !stop) || (!next && stop)) &&
+     (stop -> X stop)
+  )
+  &&
+  (
+    ( # E (initial conditions, effects, and frame):
+      G( stop -> (has_next <-> X has_next) )
+      &&
+      # F (temporal assumptions):
+      ( GF( next ) -> F( !has_next ) )
+    )
+    ->
+    # Goal:
+    FG( !has_next )
+  )
+)
+
+# one line
+G( (next -> has_next) && ((next && !stop) || (!next && stop)) && (stop -> X stop)) && ( ( G( stop -> (has_next <-> X has_next) ) && ( GF( next ) -> F( !has_next ) )) -> FG( !has_next ))
+
+input: has_next
+output: next, stop
+

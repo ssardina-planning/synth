@@ -1,0 +1,39 @@
+# D & (E & F -> G)
+
+#OBSERVATIONS (controller's input):
+empty, has_children, eq
+
+#ACTIONS (controller's output):
+extract
+put
+stop
+
+(
+  # D (preconditions, non-concurrent actions, and stop action):
+  G( (extract -> !empty) && (put -> has_children) &&
+     ((extract && !put && !stop) || (!extract && put && !stop) || (!extract && !put && stop)) &&
+     (stop -> X stop)
+  )
+  &&
+  (
+    ( # E (initial conditions, effects, and frame):
+      !empty &&
+      G( put -> X( !empty && !has_children ) ) &&
+      G( stop -> ((empty <-> X empty) && (has_children <-> X has_children) && (eq <-> X eq)) )
+      &&
+      # F (temporal assumptions):
+      ( GF(extract) -> F(empty && !has_children) )
+    )
+    ->
+    # Goal:
+    ( ( FG(eq) || FG(empty && !has_children) ) && G( (has_children && !eq) -> (!extract U put)) && G(eq -> stop) )
+  )
+)
+
+# one line
+G( (extract -> !empty) && (put -> has_children) && ((extract && !put && !stop) || (!extract && put && !stop) || (!extract && !put && stop)) && (stop -> X stop)) && ( ( !empty && G( put -> X( !empty && !has_children ) ) && G( stop -> ((empty <-> X empty) && (has_children <-> X has_children) && (eq <-> X eq)) ) && ( GF(extract) -> F(empty && !has_children) )) -> ( ( FG(eq) || FG(empty && !has_children) ) && G( (has_children && !eq) -> (!extract U put)) && G(eq -> stop) ))
+
+
+input: empty, has_children, eq
+output: extract, put, stop
+
